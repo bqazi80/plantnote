@@ -25,7 +25,7 @@ No AI, no logins, no clutter - just a clean, offline plant tracker that gives yo
 
 ## 🌿 How to Use
 
-1. Open [Plantnote on GitHub Pages](https://yourusername.github.io/plantnote/) in Chrome or Edge  
+1. Open [Plantnote on GitHub Pages](https://bqazi80.github.io/plantnote/) in Chrome or Edge  
 2. Tap the menu → **Add to Home screen**  
 3. Add your plants and care schedules  
 4. Use **Export Backup** regularly to save your data
