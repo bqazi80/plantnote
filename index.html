@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#4CAF50">
+    <title>Plantnote - Plant Care Manager</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding-top: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease;
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 18px;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        .launch-card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            animation: slideUp 0.8s ease;
+        }
+
+        .launch-btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .launch-btn:active {
+            transform: scale(0.98);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .info-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-list {
+            list-style: none;
+        }
+
+        .info-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .info-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .install-prompt {
+            display: none;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: slideDown 0.5s ease;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        .data-section {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .data-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .data-status-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .data-status-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .backup-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .backup-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .backup-btn.export {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .backup-btn.import {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .backup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .footer {
+            text-align: center;
+            opacity: 0.8;
+            font-size: 14px;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .setup-steps {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            background: white;
+            color: #667eea;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .step-text strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding-top: 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .launch-card {
+                padding: 20px;
+            }
+        }
+
+        /* PWA Install Button */
+        #installBtn {
+            display: none;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+            color: #333;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        #installBtn.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        #installBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <div class="logo-icon">🌱</div>
+            <h1>Plantnote</h1>
+            <p class="tagline">Your Complete Plant Care Manager</p>
+        </div>
+
+        <div class="install-prompt" id="installPrompt">
+            📱 Add to Home Screen for the best experience!
+        </div>
+
+        <div class="launch-card">
+            <button id="installBtn">📲 Install Plantnote App</button>
+            <a href="plantnote_complete.html" class="launch-btn">
+                🌿 Open Plantnote
+            </a>
+            <p style="text-align: center; color: #666; margin-top: 10px; font-size: 14px;">
+                Works best in Chrome or Edge
+            </p>
+        </div>
+
+        <div class="data-section">
+            <h3 style="margin-bottom: 15px; color: #333;">📊 Your Data</h3>
+            <div class="data-status">
+                <span class="data-status-label">Local Storage</span>
+                <span class="data-status-value" id="storageStatus">Checking...</span>
+            </div>
+            <div class="data-status">
+                <span class="data-status-label">Plants Saved</span>
+                <span class="data-status-value" id="plantCount">0</span>
+            </div>
+            <div class="data-status">
+                <span class="data-status-label">Last Backup</span>
+                <span class="data-status-value" id="lastBackup">Never</span>
+            </div>
+            <div class="backup-controls">
+                <button class="backup-btn export" onclick="exportData()">
+                    💾 Export Backup
+                </button>
+                <button class="backup-btn import" onclick="importData()">
+                    📂 Import Backup
+                </button>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3 class="info-title">
+                <span>✨</span>
+                <span>Features</span>
+            </h3>
+            <ul class="info-list">
+                <li>Multiple care types (water, fertilize, mist, repot, custom)</li>
+                <li>Plant diary with photo galleries</li>
+                <li>Individual care schedules & reminders</li>
+                <li>Archive for inactive plants</li>
+                <li>Bulk actions & management</li>
+                <li>Works completely offline</li>
+                <li>Automatic data backup</li>
+                <li>No account or login required</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h3 class="info-title">
+                <span>🚀</span>
+                <span>Quick Setup</span>
+            </h3>
+            <div class="setup-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <strong>Open in Chrome</strong>
+                        Make sure you're using Chrome or Edge browser
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <strong>Install the App</strong>
+                        Click "Install" button above or use menu → "Add to Home Screen"
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <strong>Add Your Plants</strong>
+                        Start adding plants with photos and care schedules
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">
+                        <strong>Enable Notifications</strong>
+                        Get reminded when plants need care
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-text">
+                        <strong>Regular Backups</strong>
+                        Export your data weekly for safety
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status">
+            <span class="status-indicator"></span>
+            <span id="statusText">Ready to use</span>
+        </div>
+
+        <div class="footer">
+            <p>🌱 Plantnote - Plant Care Made Simple</p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                Your data is stored locally on this device<br>
+                Remember to backup regularly!
+            </p>
+        </div>
+    </div>
+
+    <input type="file" id="importInput" accept=".json" style="display: none;">
+
+    <script>
+        // Check storage status
+        function checkStorage() {
+            try {
+                // Test localStorage
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                document.getElementById('storageStatus').textContent = 'Active ✓';
+                document.getElementById('storageStatus').style.color = '#4CAF50';
+
+                // Check for existing data
+                const plants = localStorage.getItem('plantnote_plants');
+                if (plants) {
+                    const plantData = JSON.parse(plants);
+                    document.getElementById('plantCount').textContent = plantData.length;
+                }
+
+                // Check last backup
+                const lastBackup = localStorage.getItem('plantnote_lastBackup');
+                if (lastBackup) {
+                    const date = new Date(lastBackup);
+                    document.getElementById('lastBackup').textContent = date.toLocaleDateString();
+                }
+
+            } catch (e) {
+                document.getElementById('storageStatus').textContent = 'Error ✗';
+                document.getElementById('storageStatus').style.color = '#F44336';
+                document.getElementById('statusText').textContent = 'Storage unavailable - check browser settings';
+            }
+        }
+
+        // Export data
+        function exportData() {
+            const data = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                plants: JSON.parse(localStorage.getItem('plantnote_plants') || '[]'),
+                diary: JSON.parse(localStorage.getItem('plantnote_diary') || '[]'),
+                settings: JSON.parse(localStorage.getItem('plantnote_settings') || '{}'),
+                customCareTypes: JSON.parse(localStorage.getItem('plantnote_customCareTypes') || '[]')
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `plantnote_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            // Update last backup time
+            localStorage.setItem('plantnote_lastBackup', new Date().toISOString());
+            document.getElementById('lastBackup').textContent = new Date().toLocaleDateString();
+            
+            showNotification('Backup exported successfully!');
+        }
+
+        // Import data
+        function importData() {
+            document.getElementById('importInput').click();
+        }
+
+        document.getElementById('importInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    if (confirm('This will replace all current data. Are you sure?')) {
+                        // Import all data
+                        if (data.plants) localStorage.setItem('plantnote_plants', JSON.stringify(data.plants));
+                        if (data.diary) localStorage.setItem('plantnote_diary', JSON.stringify(data.diary));
+                        if (data.settings) localStorage.setItem('plantnote_settings', JSON.stringify(data.settings));
+                        if (data.customCareTypes) localStorage.setItem('plantnote_customCareTypes', JSON.stringify(data.customCareTypes));
+                        
+                        checkStorage();
+                        showNotification('Data imported successfully!');
+                    }
+                } catch (error) {
+                    showNotification('Error reading backup file', true);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Show notification
+        function showNotification(message, isError = false) {
+            const status = document.getElementById('statusText');
+            status.textContent = message;
+            status.style.color = isError ? '#F44336' : '#4CAF50';
+            
+            setTimeout(() => {
+                status.textContent = 'Ready to use';
+                status.style.color = '';
+            }, 3000);
+        }
+
+        // PWA Install
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.add('show');
+            document.getElementById('installPrompt').classList.add('show');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    showNotification('App installed successfully!');
+                    installBtn.style.display = 'none';
+                    document.getElementById('installPrompt').classList.remove('show');
+                }
+                
+                deferredPrompt = null;
+            }
+        });
+
+        // Check if app is installed
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.getElementById('installPrompt').innerHTML = '✅ App is installed and ready!';
+            document.getElementById('installPrompt').classList.add('show');
+        }
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(registration => {
+                console.log('Service Worker registered');
+                document.getElementById('statusText').textContent = 'Ready to use (offline capable)';
+            }).catch(error => {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+
+        // Initialize
+        checkStorage();
+
+        // Auto-save reminder
+        if (!localStorage.getItem('plantnote_reminderShown')) {
+            setTimeout(() => {
+                if (confirm('💡 Tip: Set a weekly reminder to backup your plant data. Would you like to set one now?')) {
+                    localStorage.setItem('plantnote_reminderShown', 'true');
+                    showNotification('Remember to backup weekly!');
+                }
+            }, 30000); // Show after 30 seconds
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Plantnote - Plant Care Manager</title>
+    <meta name="description" content="Complete plant care management with multiple care types, diary, and photos">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #81C784;
+            --accent: #FFC107;
+            --danger: #F44336;
+            --warning: #FF9800;
+            --info: #2196F3;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --text: #212121;
+            --text-secondary: #757575;
+            --archive: #9E9E9E;
+            --border: #E0E0E0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            overscroll-behavior: contain;
+        }
+
+        /* Header */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 80px;
+        }
+
+        /* View Toggles */
+        .view-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            background: var(--surface);
+            padding: 0.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .view-btn:not(.active):hover {
+            background: var(--background);
+        }
+
+        /* Filter and Sort */
+        .filter-sort-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 0.4rem 0.8rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Plant Grid */
+        .plant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Plant Card */
+        .plant-card {
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .plant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .plant-card.archived {
+            opacity: 0.7;
+            border: 2px solid var(--archive);
+        }
+
+        .plant-image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: #E8F5E9;
+            overflow: hidden;
+        }
+
+        .plant-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .plant-default-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--primary);
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+        }
+
+        .photo-count {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .care-badges {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+
+        .care-badge {
+            background: white;
+            padding: 0.2rem 0.4rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .care-badge.due {
+            background: var(--danger);
+            color: white;
+        }
+
+        .care-badge.soon {
+            background: var(--warning);
+            color: white;
+        }
+
+        .plant-info {
+            padding: 1rem;
+        }
+
+        .plant-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .plant-location {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .plant-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.4rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Plant Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            margin: 2rem auto;
+            max-width: 600px;
+            width: 95%;
+            border-radius: 12px;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Photo Gallery */
+        .photo-gallery {
+            margin-bottom: 1.5rem;
+        }
+
+        .main-photo {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: var(--background);
+        }
+
+        .photo-thumbnails {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .photo-thumb {
+            min-width: 60px;
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .photo-thumb.active,
+        .photo-thumb:hover {
+            border-color: var(--primary);
+        }
+
+        .add-photo-btn {
+            min-width: 60px;
+            width: 60px;
+            height: 60px;
+            border: 2px dashed var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: var(--background);
+            transition: all 0.3s;
+        }
+
+        .add-photo-btn:hover {
+            border-color: var(--primary);
+            background: #E8F5E9;
+        }
+
+        /* Care Schedule */
+        .care-schedule {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .care-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .care-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .care-item-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .care-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+
+        .care-icon.water { background: #E3F2FD; }
+        .care-icon.fertilize { background: #FFF3E0; }
+        .care-icon.mist { background: #E8F5E9; }
+        .care-icon.repot { background: #FCE4EC; }
+        .care-icon.custom { background: #F3E5F5; }
+
+        .care-details {
+            flex: 1;
+        }
+
+        .care-type {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .care-frequency {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .care-next-date {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            background: var(--background);
+            white-space: nowrap;
+        }
+
+        .care-next-date.overdue {
+            background: var(--danger);
+            color: white;
+        }
+
+        .care-next-date.today {
+            background: var(--warning);
+            color: white;
+        }
+
+        .care-next-date.soon {
+            background: var(--accent);
+            color: white;
+        }
+
+        .care-action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .care-action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Plant Diary */
+        .plant-diary {
+            margin-bottom: 1.5rem;
+        }
+
+        .diary-entries {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .diary-entry {
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .diary-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .diary-content {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .diary-icon {
+            font-size: 1rem;
+        }
+
+        .diary-text {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .diary-photo {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Add Diary Entry */
+        .add-diary-form {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .diary-input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .diary-photo-btn {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            transition: all 0.3s;
+        }
+
+        .diary-photo-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Plant Notes */
+        .plant-notes {
+            margin-bottom: 1.5rem;
+        }
+
+        .notes-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .image-upload {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: var(--background);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload:hover {
+            background: #E8F5E9;
+            border-color: var(--primary);
+        }
+
+        .image-upload input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Care Type Inputs */
+        .care-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .care-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--background);
+            border-radius: 8px;
+        }
+
+        .care-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .care-input-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .care-frequency-input {
+            width: 100px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .care-frequency-unit {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Custom Care */
+        .custom-care-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .custom-care-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .custom-care-name {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .add-custom-care-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+        }
+
+        .add-custom-care-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .remove-custom-btn {
+            padding: 0.5rem;
+            border: none;
+            background: var(--danger);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5rem 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.2rem;
+        }
+
+        /* FAB */
+        .fab {
+            position: fixed;
+            bottom: 80px;
+            right: 1rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.5);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            padding: 1rem;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 101;
+        }
+
+        .bulk-actions.active {
+            display: block;
+        }
+
+        .bulk-actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .bulk-selected-count {
+            font-weight: 500;
+        }
+
+        .bulk-action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .bulk-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .bulk-action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .bulk-action-btn.danger {
+            background: var(--danger);
+        }
+
+        .bulk-action-btn.danger:hover {
+            background: #D32F2F;
+        }
+
+        /* Selection Mode */
+        .plant-card.selection-mode {
+            position: relative;
+        }
+
+        .selection-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .selection-mode .selection-checkbox {
+            display: flex;
+        }
+
+        .selection-checkbox.checked {
+            background: var(--primary);
+            color: white;
+        }
+
+        .selection-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-text {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--background);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #D32F2F;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        /* Loading & Notifications */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .notification.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            padding: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .setting-label {
+            font-weight: 500;
+        }
+
+        .setting-value {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .plant-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .modal-content {
+                margin: 0;
+                max-width: 100%;
+                width: 100%;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .care-frequency-input {
+                width: 80px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .bottom-nav {
+                display: none;
+            }
+            
+            .fab {
+                bottom: 2rem;
+            }
+            
+            main {
+                padding-bottom: 2rem;
+            }
+        }
+
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #121212;
+                --surface: #1E1E1E;
+                --text: #FFFFFF;
+                --text-secondary: #AAAAAA;
+                --border: #333333;
+            }
+            
+            .header-btn {
+                background: rgba(255,255,255,0.1);
+            }
+            
+            .plant-default-icon {
+                background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🌱 Plantnote</h1>
+            <div class="header-buttons">
+                <button class="header-btn" id="searchBtn" title="Search">🔍</button>
+                <button class="header-btn" id="backupBtn" title="Backup">💾</button>
+                <button class="header-btn" id="settingsBtn" title="Settings">⚙️</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="view-controls">
+            <button class="view-btn active" data-view="active">Active Plants</button>
+            <button class="view-btn" data-view="archive">Archive</button>
+            <button class="view-btn" data-view="calendar">Calendar</button>
+            <button class="view-btn" data-view="diary">All Diaries</button>
+        </div>
+
+        <div class="filter-sort-bar">
+            <div class="filter-chip active" data-filter="all">All</div>
+            <div class="filter-chip" data-filter="needs-care">Needs Care</div>
+            <div class="filter-chip" data-filter="location">By Location</div>
+            <div class="filter-chip" data-filter="alphabetical">A-Z</div>
+        </div>
+
+        <div id="plantContainer" class="plant-grid">
+            <!-- Plants will be dynamically added here -->
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-icon">🌿</div>
+            <h2 class="empty-title">No plants yet</h2>
+            <p class="empty-text">Add your first plant to start tracking!</p>
+            <button class="btn btn-primary" onclick="plantManager.openAddPlantModal()">
+                <span>➕</span> Add Your First Plant
+            </button>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a class="nav-item active" data-page="plants">
+            <span class="nav-icon">🌿</span>
+            <span>Plants</span>
+        </a>
+        <a class="nav-item" data-page="reminders">
+            <span class="nav-icon">⏰</span>
+            <span>Reminders</span>
+        </a>
+        <a class="nav-item" data-page="diary">
+            <span class="nav-icon">📖</span>
+            <span>Diary</span>
+        </a>
+        <a class="nav-item" data-page="stats">
+            <span class="nav-icon">📊</span>
+            <span>Stats</span>
+        </a>
+    </nav>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fabBtn">+</button>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" id="bulkActions">
+        <div class="bulk-actions-header">
+            <span class="bulk-selected-count">
+                <span id="selectedCount">0</span> selected
+            </span>
+            <button class="btn-secondary" onclick="plantManager.cancelSelection()">Cancel</button>
+        </div>
+        <div class="bulk-action-buttons">
+            <button class="bulk-action-btn" onclick="plantManager.bulkWater()">💧 Water All</button>
+            <button class="bulk-action-btn" onclick="plantManager.bulkFertilize()">🌰 Fertilize All</button>
+            <button class="bulk-action-btn" onclick="plantManager.bulkEdit()">✏️ Edit</button>
+            <button class="bulk-action-btn danger" onclick="plantManager.bulkArchive()">📦 Archive</button>
+        </div>
+    </div>
+
+    <!-- Plant Detail/Edit Modal -->
+    <div class="modal" id="plantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Plant Details</h2>
+                <button class="modal-close" onclick="plantManager.closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Plant Form Template -->
+    <template id="plantFormTemplate">
+        <form id="plantForm">
+            <div class="form-group">
+                <label for="plantName">Plant Name *</label>
+                <input type="text" id="plantName" name="name" required placeholder="e.g., Monstera, Snake Plant">
+            </div>
+
+            <div class="form-group">
+                <label for="plantLocation">Location</label>
+                <input type="text" id="plantLocation" name="location" placeholder="e.g., Living Room, Kitchen Window">
+            </div>
+
+            <div class="form-group">
+                <label for="plantImage">Plant Photo</label>
+                <div class="image-upload">
+                    <input type="file" id="plantImage" accept="image/*" multiple>
+                    <img class="image-preview" id="imagePreview" style="display: none;">
+                    <div id="uploadText">
+                        <div style="font-size: 2rem;">📷</div>
+                        <div>Click to add photos</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Care Schedule</label>
+                <div class="care-inputs">
+                    <div class="care-input-group">
+                        <input type="checkbox" id="waterEnabled" class="care-checkbox" checked>
+                        <label for="waterEnabled" class="care-input-label">
+                            <span>💧 Water every</span>
+                        </label>
+                        <input type="number" id="waterFrequency" class="care-frequency-input" value="7" min="1">
+                        <span class="care-frequency-unit">days</span>
+                    </div>
+
+                    <div class="care-input-group">
+                        <input type="checkbox" id="fertilizeEnabled" class="care-checkbox">
+                        <label for="fertilizeEnabled" class="care-input-label">
+                            <span>🌰 Fertilize every</span>
+                        </label>
+                        <input type="number" id="fertilizeFrequency" class="care-frequency-input" value="30" min="1">
+                        <span class="care-frequency-unit">days</span>
+                    </div>
+
+                    <div class="care-input-group">
+                        <input type="checkbox" id="mistEnabled" class="care-checkbox">
+                        <label for="mistEnabled" class="care-input-label">
+                            <span>💨 Mist every</span>
+                        </label>
+                        <input type="number" id="mistFrequency" class="care-frequency-input" value="3" min="1">
+                        <span class="care-frequency-unit">days</span>
+                    </div>
+
+                    <div class="care-input-group">
+                        <input type="checkbox" id="repotEnabled" class="care-checkbox">
+                        <label for="repotEnabled" class="care-input-label">
+                            <span>🪴 Repot every</span>
+                        </label>
+                        <input type="number" id="repotFrequency" class="care-frequency-input" value="365" min="1">
+                        <span class="care-frequency-unit">days</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Custom Care Types</label>
+                    <div class="custom-care-list" id="customCareList">
+                        <!-- Custom care items added dynamically -->
+                    </div>
+                    <button type="button" class="add-custom-care-btn" onclick="plantManager.addCustomCare()">
+                        + Add Custom Care
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="plantNotes">Notes</label>
+                <textarea id="plantNotes" name="notes" rows="4" placeholder="Care instructions, soil type, sunlight needs..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" onclick="plantManager.closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Plant</button>
+            </div>
+        </form>
+    </template>
+
+    <!-- Plant Detail View Template -->
+    <template id="plantDetailTemplate">
+        <div class="plant-detail">
+            <div class="photo-gallery">
+                <img class="main-photo" id="mainPhoto" src="" alt="">
+                <div class="photo-thumbnails" id="photoThumbnails">
+                    <!-- Thumbnails added dynamically -->
+                </div>
+            </div>
+
+            <div class="care-schedule">
+                <h3 class="section-title">📅 Care Schedule</h3>
+                <div class="care-items" id="careItems">
+                    <!-- Care items added dynamically -->
+                </div>
+            </div>
+
+            <div class="plant-diary">
+                <h3 class="section-title">📖 Plant Diary</h3>
+                <div class="diary-entries" id="diaryEntries">
+                    <!-- Diary entries added dynamically -->
+                </div>
+                <div class="add-diary-form">
+                    <input type="text" class="diary-input" id="diaryInput" placeholder="Add a note...">
+                    <button class="diary-photo-btn" onclick="plantManager.addDiaryPhoto()">📷</button>
+                    <button class="btn btn-primary" onclick="plantManager.addDiaryEntry()">Add</button>
+                </div>
+            </div>
+
+            <div class="plant-notes">
+                <h3 class="section-title">📝 Notes</h3>
+                <textarea class="notes-input" id="notesInput" placeholder="Add notes about this plant..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="plantManager.editPlant()">✏️ Edit</button>
+                <button class="btn btn-danger" onclick="plantManager.archivePlant()">📦 Archive</button>
+            </div>
+        </div>
+    </template>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Plantnote Web App - Complete Implementation
+        class PlantManager {
+            constructor() {
+                this.plants = this.loadData('plants') || [];
+                this.diaryEntries = this.loadData('diary') || [];
+                this.settings = this.loadData('settings') || this.getDefaultSettings();
+                this.currentView = 'active';
+                this.currentFilter = 'all';
+                this.selectionMode = false;
+                this.selectedPlants = new Set();
+                this.currentPlant = null;
+                this.customCareTypes = this.loadData('customCareTypes') || [];
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.renderPlants();
+                this.checkReminders();
+                this.startReminderCheck();
+                
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+            }
+
+            setupEventListeners() {
+                // View controls
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.switchView(btn.dataset.view));
+                });
+
+                // Filter controls
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.addEventListener('click', () => this.setFilter(chip.dataset.filter));
+                });
+
+                // Bottom navigation
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.switchPage(item.dataset.page);
+                    });
+                });
+
+                // FAB
+                document.getElementById('fabBtn').addEventListener('click', () => {
+                    if (this.selectionMode) {
+                        this.toggleSelectionMode();
+                    } else {
+                        this.openAddPlantModal();
+                    }
+                });
+
+                // Header buttons
+                document.getElementById('searchBtn').addEventListener('click', () => this.openSearch());
+                document.getElementById('backupBtn').addEventListener('click', () => this.showBackupOptions());
+                document.getElementById('settingsBtn').addEventListener('click', () => this.openSettings());
+
+                // Modal close on outside click
+                document.getElementById('plantModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        this.closeModal();
+                    }
+                });
+
+                // Long press for selection mode
+                let pressTimer;
+                document.addEventListener('mousedown', (e) => {
+                    const card = e.target.closest('.plant-card');
+                    if (card && !this.selectionMode) {
+                        pressTimer = setTimeout(() => {
+                            this.enterSelectionMode();
+                            this.togglePlantSelection(card.dataset.plantId);
+                        }, 500);
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    clearTimeout(pressTimer);
+                });
+
+                // Handle plant card clicks
+                document.addEventListener('click', (e) => {
+                    const card = e.target.closest('.plant-card');
+                    if (card) {
+                        if (this.selectionMode) {
+                            e.preventDefault();
+                            this.togglePlantSelection(card.dataset.plantId);
+                        } else if (!e.target.closest('.action-btn')) {
+                            this.openPlantDetail(card.dataset.plantId);
+                        }
+                    }
+                });
+            }
+
+            // View and Filter Management
+            switchView(view) {
+                this.currentView = view;
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                this.renderPlants();
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                document.querySelectorAll('.filter-chip').forEach(chip => {
+                    chip.classList.toggle('active', chip.dataset.filter === filter);
+                });
+                this.renderPlants();
+            }
+
+            switchPage(page) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.page === page);
+                });
+                // Handle different pages
+                switch(page) {
+                    case 'plants':
+                        this.renderPlants();
+                        break;
+                    case 'reminders':
+                        this.showReminders();
+                        break;
+                    case 'diary':
+                        this.showAllDiaries();
+                        break;
+                    case 'stats':
+                        this.showStats();
+                        break;
+                }
+            }
+
+            // Plant Rendering
+            renderPlants() {
+                const container = document.getElementById('plantContainer');
+                const emptyState = document.getElementById('emptyState');
+                
+                let plantsToShow = this.plants.filter(p => 
+                    this.currentView === 'active' ? !p.archived : p.archived
+                );
+
+                // Apply filters
+                plantsToShow = this.filterPlants(plantsToShow);
+                
+                // Apply sorting
+                plantsToShow = this.sortPlants(plantsToShow);
+
+                if (plantsToShow.length === 0) {
+                    container.style.display = 'none';
+                    emptyState.style.display = 'block';
+                } else {
+                    container.style.display = 'grid';
+                    emptyState.style.display = 'none';
+                    
+                    container.innerHTML = plantsToShow.map(plant => this.createPlantCard(plant)).join('');
+                    
+                    if (this.selectionMode) {
+                        container.querySelectorAll('.plant-card').forEach(card => {
+                            card.classList.add('selection-mode');
+                            const checkbox = card.querySelector('.selection-checkbox');
+                            if (this.selectedPlants.has(card.dataset.plantId)) {
+                                checkbox.classList.add('checked');
+                            }
+                        });
+                    }
+                }
+            }
+
+            createPlantCard(plant) {
+                const needsCare = this.getPlantCareStatus(plant);
+                const photoCount = plant.photos ? plant.photos.length : 0;
+                const mainPhoto = plant.photos && plant.photos.length > 0 ? plant.photos[0] : null;
+                
+                return `
+                    <div class="plant-card ${plant.archived ? 'archived' : ''}" data-plant-id="${plant.id}">
+                        <div class="selection-checkbox"></div>
+                        <div class="plant-image-container">
+                            ${mainPhoto ? 
+                                `<img class="plant-image" src="${mainPhoto}" alt="${plant.name}">` :
+                                `<div class="plant-default-icon">🌿</div>`
+                            }
+                            ${photoCount > 1 ? `
+                                <div class="photo-count">
+                                    <span>📷</span>
+                                    <span>${photoCount}</span>
+                                </div>
+                            ` : ''}
+                            <div class="care-badges">
+                                ${needsCare.map(care => `
+                                    <div class="care-badge ${care.status}">
+                                        ${care.icon} ${care.type}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="plant-info">
+                            <div class="plant-name">
+                                ${plant.name}
+                                ${plant.archived ? '📦' : ''}
+                            </div>
+                            ${plant.location ? `
+                                <div class="plant-location">
+                                    📍 ${plant.location}
+                                </div>
+                            ` : ''}
+                            <div class="plant-actions">
+                                <button class="action-btn" onclick="event.stopPropagation(); plantManager.quickCare('${plant.id}', 'water')">
+                                    💧 Water
+                                </button>
+                                <button class="action-btn" onclick="event.stopPropagation(); plantManager.quickCare('${plant.id}', 'fertilize')">
+                                    🌰 Feed
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            filterPlants(plants) {
+                switch(this.currentFilter) {
+                    case 'needs-care':
+                        return plants.filter(p => {
+                            const status = this.getPlantCareStatus(p);
+                            return status.some(s => s.status === 'due' || s.status === 'soon');
+                        });
+                    case 'location':
+                        return plants.sort((a, b) => (a.location || '').localeCompare(b.location || ''));
+                    case 'alphabetical':
+                        return plants.sort((a, b) => a.name.localeCompare(b.name));
+                    default:
+                        return plants;
+                }
+            }
+
+            sortPlants(plants) {
+                // Additional sorting logic
+                return plants;
+            }
+
+            getPlantCareStatus(plant) {
+                const status = [];
+                const now = new Date();
+                
+                const careTypes = [
+                    { type: 'water', icon: '💧', key: 'water' },
+                    { type: 'fertilize', icon: '🌰', key: 'fertilize' },
+                    { type: 'mist', icon: '💨', key: 'mist' },
+                    { type: 'repot', icon: '🪴', key: 'repot' }
+                ];
+
+                careTypes.forEach(care => {
+                    if (plant.care && plant.care[care.key]) {
+                        const lastDone = plant.care[care.key].lastDone ? new Date(plant.care[care.key].lastDone) : new Date(plant.createdAt);
+                        const frequency = plant.care[care.key].frequency;
+                        const nextDue = new Date(lastDone);
+                        nextDue.setDate(nextDue.getDate() + frequency);
+                        
+                        const daysUntil = Math.ceil((nextDue - now) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysUntil < 0) {
+                            status.push({ type: care.type, icon: care.icon, status: 'due' });
+                        } else if (daysUntil <= 1) {
+                            status.push({ type: care.type, icon: care.icon, status: 'soon' });
+                        }
+                    }
+                });
+
+                // Custom care types
+                if (plant.customCare) {
+                    plant.customCare.forEach(custom => {
+                        const lastDone = custom.lastDone ? new Date(custom.lastDone) : new Date(plant.createdAt);
+                        const nextDue = new Date(lastDone);
+                        nextDue.setDate(nextDue.getDate() + custom.frequency);
+                        
+                        const daysUntil = Math.ceil((nextDue - now) / (1000 * 60 * 60 * 24));
+                        
+                        if (daysUntil < 0) {
+                            status.push({ type: custom.name, icon: '⭐', status: 'due' });
+                        } else if (daysUntil <= 1) {
+                            status.push({ type: custom.name, icon: '⭐', status: 'soon' });
+                        }
+                    });
+                }
+
+                return status;
+            }
+
+            // Plant Management
+            openAddPlantModal() {
+                const modal = document.getElementById('plantModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalBody = document.getElementById('modalBody');
+                
+                modalTitle.textContent = 'Add New Plant';
+                modalBody.innerHTML = document.getElementById('plantFormTemplate').innerHTML;
+                
+                modal.classList.add('active');
+                this.currentPlant = null;
+                
+                // Setup form submission
+                document.getElementById('plantForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.savePlant();
+                });
+
+                // Setup image upload
+                document.getElementById('plantImage').addEventListener('change', (e) => {
+                    this.handleImageUpload(e);
+                });
+            }
+
+            openPlantDetail(plantId) {
+                const plant = this.plants.find(p => p.id === plantId);
+                if (!plant) return;
+                
+                this.currentPlant = plant;
+                const modal = document.getElementById('plantModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalBody = document.getElementById('modalBody');
+                
+                modalTitle.textContent = plant.name;
+                modalBody.innerHTML = document.getElementById('plantDetailTemplate').innerHTML;
+                
+                // Populate detail view
+                this.populatePlantDetail(plant);
+                
+                modal.classList.add('active');
+            }
+
+            populatePlantDetail(plant) {
+                // Photos
+                if (plant.photos && plant.photos.length > 0) {
+                    document.getElementById('mainPhoto').src = plant.photos[0];
+                    const thumbContainer = document.getElementById('photoThumbnails');
+                    thumbContainer.innerHTML = plant.photos.map((photo, index) => `
+                        <img class="photo-thumb ${index === 0 ? 'active' : ''}" 
+                             src="${photo}" 
+                             onclick="plantManager.selectPhoto(${index})">
+                    `).join('') + `
+                        <div class="add-photo-btn" onclick="plantManager.addPhoto()">+</div>
+                    `;
+                }
+
+                // Care Schedule
+                const careContainer = document.getElementById('careItems');
+                let careHTML = '';
+                
+                const careTypes = [
+                    { type: 'water', icon: '💧', label: 'Water', key: 'water' },
+                    { type: 'fertilize', icon: '🌰', label: 'Fertilize', key: 'fertilize' },
+                    { type: 'mist', icon: '💨', label: 'Mist', key: 'mist' },
+                    { type: 'repot', icon: '🪴', label: 'Repot', key: 'repot' }
+                ];
+
+                careTypes.forEach(care => {
+                    if (plant.care && plant.care[care.key]) {
+                        const nextDate = this.getNextCareDate(plant, care.key);
+                        const status = this.getCareStatus(nextDate);
+                        
+                        careHTML += `
+                            <div class="care-item">
+                                <div class="care-item-info">
+                                    <div class="care-icon ${care.type}">${care.icon}</div>
+                                    <div class="care-details">
+                                        <div class="care-type">${care.label}</div>
+                                        <div class="care-frequency">Every ${plant.care[care.key].frequency} days</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="care-next-date ${status.class}">${status.text}</span>
+                                    <button class="care-action-btn" onclick="plantManager.recordCare('${plant.id}', '${care.key}')">
+                                        Done
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                // Custom care
+                if (plant.customCare) {
+                    plant.customCare.forEach(custom => {
+                        const nextDate = this.getNextCustomCareDate(plant, custom);
+                        const status = this.getCareStatus(nextDate);
+                        
+                        careHTML += `
+                            <div class="care-item">
+                                <div class="care-item-info">
+                                    <div class="care-icon custom">⭐</div>
+                                    <div class="care-details">
+                                        <div class="care-type">${custom.name}</div>
+                                        <div class="care-frequency">Every ${custom.frequency} days</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="care-next-date ${status.class}">${status.text}</span>
+                                    <button class="care-action-btn" onclick="plantManager.recordCustomCare('${plant.id}', '${custom.id}')">
+                                        Done
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                careContainer.innerHTML = careHTML || '<p style="color: var(--text-secondary);">No care schedule set</p>';
+
+                // Diary
+                this.loadPlantDiary(plant.id);
+
+                // Notes
+                document.getElementById('notesInput').value = plant.notes || '';
+                document.getElementById('notesInput').addEventListener('blur', () => {
+                    plant.notes = document.getElementById('notesInput').value;
+                    this.savePlants();
+                });
+            }
+
+            getNextCareDate(plant, careType) {
+                const lastDone = plant.care[careType].lastDone ? 
+                    new Date(plant.care[careType].lastDone) : 
+                    new Date(plant.createdAt);
+                const frequency = plant.care[careType].frequency;
+                const nextDate = new Date(lastDone);
+                nextDate.setDate(nextDate.getDate() + frequency);
+                return nextDate;
+            }
+
+            getNextCustomCareDate(plant, customCare) {
+                const lastDone = customCare.lastDone ? 
+                    new Date(customCare.lastDone) : 
+                    new Date(plant.createdAt);
+                const nextDate = new Date(lastDone);
+                nextDate.setDate(nextDate.getDate() + customCare.frequency);
+                return nextDate;
+            }
+
+            getCareStatus(date) {
+                const now = new Date();
+                const daysUntil = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+                
+                if (daysUntil < 0) {
+                    return { class: 'overdue', text: `Overdue by ${Math.abs(daysUntil)} days` };
+                } else if (daysUntil === 0) {
+                    return { class: 'today', text: 'Due today' };
+                } else if (daysUntil === 1) {
+                    return { class: 'soon', text: 'Tomorrow' };
+                } else if (daysUntil <= 3) {
+                    return { class: 'soon', text: `In ${daysUntil} days` };
+                } else {
+                    return { class: '', text: date.toLocaleDateString() };
+                }
+            }
+
+            savePlant() {
+                const form = document.getElementById('plantForm');
+                const formData = new FormData(form);
+                
+                const plant = this.currentPlant || {
+                    id: Date.now().toString(),
+                    createdAt: new Date().toISOString(),
+                    photos: [],
+                    archived: false
+                };
+
+                // Basic info
+                plant.name = formData.get('name');
+                plant.location = formData.get('location');
+                plant.notes = formData.get('notes');
+
+                // Care schedule
+                plant.care = {};
+                
+                if (document.getElementById('waterEnabled').checked) {
+                    plant.care.water = {
+                        frequency: parseInt(document.getElementById('waterFrequency').value),
+                        lastDone: plant.care.water?.lastDone || null
+                    };
+                }
+
+                if (document.getElementById('fertilizeEnabled').checked) {
+                    plant.care.fertilize = {
+                        frequency: parseInt(document.getElementById('fertilizeFrequency').value),
+                        lastDone: plant.care.fertilize?.lastDone || null
+                    };
+                }
+
+                if (document.getElementById('mistEnabled').checked) {
+                    plant.care.mist = {
+                        frequency: parseInt(document.getElementById('mistFrequency').value),
+                        lastDone: plant.care.mist?.lastDone || null
+                    };
+                }
+
+                if (document.getElementById('repotEnabled').checked) {
+                    plant.care.repot = {
+                        frequency: parseInt(document.getElementById('repotFrequency').value),
+                        lastDone: plant.care.repot?.lastDone || null
+                    };
+                }
+
+                // Custom care
+                const customCares = [];
+                document.querySelectorAll('.custom-care-item').forEach(item => {
+                    const name = item.querySelector('.custom-care-name').value;
+                    const frequency = item.querySelector('.custom-care-frequency').value;
+                    if (name && frequency) {
+                        customCares.push({
+                            id: Date.now().toString() + Math.random(),
+                            name: name,
+                            frequency: parseInt(frequency),
+                            lastDone: null
+                        });
+                    }
+                });
+                if (customCares.length > 0) {
+                    plant.customCare = customCares;
+                }
+
+                // Handle images
+                const imagePreview = document.getElementById('imagePreview');
+                if (imagePreview.src && imagePreview.style.display !== 'none') {
+                    if (!plant.photos.includes(imagePreview.src)) {
+                        plant.photos.push(imagePreview.src);
+                    }
+                }
+
+                // Save
+                if (this.currentPlant) {
+                    const index = this.plants.findIndex(p => p.id === plant.id);
+                    this.plants[index] = plant;
+                } else {
+                    this.plants.push(plant);
+                    this.addDiaryEntry(plant.id, 'Plant added to collection', 'add');
+                }
+
+                this.savePlants();
+                this.renderPlants();
+                this.closeModal();
+                this.showNotification(`${plant.name} ${this.currentPlant ? 'updated' : 'added'} successfully!`);
+            }
+
+            editPlant() {
+                const plant = this.currentPlant;
+                if (!plant) return;
+
+                const modalTitle = document.getElementById('modalTitle');
+                const modalBody = document.getElementById('modalBody');
+                
+                modalTitle.textContent = 'Edit ' + plant.name;
+                modalBody.innerHTML = document.getElementById('plantFormTemplate').innerHTML;
+                
+                // Populate form with existing data
+                document.getElementById('plantName').value = plant.name;
+                document.getElementById('plantLocation').value = plant.location || '';
+                document.getElementById('plantNotes').value = plant.notes || '';
+
+                // Care schedule
+                if (plant.care) {
+                    if (plant.care.water) {
+                        document.getElementById('waterEnabled').checked = true;
+                        document.getElementById('waterFrequency').value = plant.care.water.frequency;
+                    }
+                    if (plant.care.fertilize) {
+                        document.getElementById('fertilizeEnabled').checked = true;
+                        document.getElementById('fertilizeFrequency').value = plant.care.fertilize.frequency;
+                    }
+                    if (plant.care.mist) {
+                        document.getElementById('mistEnabled').checked = true;
+                        document.getElementById('mistFrequency').value = plant.care.mist.frequency;
+                    }
+                    if (plant.care.repot) {
+                        document.getElementById('repotEnabled').checked = true;
+                        document.getElementById('repotFrequency').value = plant.care.repot.frequency;
+                    }
+                }
+
+                // Setup form submission
+                document.getElementById('plantForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.savePlant();
+                });
+
+                // Setup image upload
+                document.getElementById('plantImage').addEventListener('change', (e) => {
+                    this.handleImageUpload(e);
+                });
+            }
+
+            archivePlant() {
+                if (!this.currentPlant) return;
+                
+                if (confirm(`Archive ${this.currentPlant.name}? You can restore it later from the archive.`)) {
+                    this.currentPlant.archived = true;
+                    this.currentPlant.archivedAt = new Date().toISOString();
+                    this.savePlants();
+                    this.renderPlants();
+                    this.closeModal();
+                    this.showNotification(`${this.currentPlant.name} moved to archive`);
+                }
+            }
+
+            // Care Recording
+            quickCare(plantId, careType) {
+                this.recordCare(plantId, careType);
+            }
+
+            recordCare(plantId, careType) {
+                const plant = this.plants.find(p => p.id === plantId);
+                if (!plant || !plant.care || !plant.care[careType]) return;
+
+                plant.care[careType].lastDone = new Date().toISOString();
+                this.savePlants();
+                
+                // Add to diary
+                const careLabels = {
+                    water: 'Watered',
+                    fertilize: 'Fertilized',
+                    mist: 'Misted',
+                    repot: 'Repotted'
+                };
+                this.addDiaryEntry(plantId, careLabels[careType], careType);
+                
+                this.renderPlants();
+                if (this.currentPlant && this.currentPlant.id === plantId) {
+                    this.populatePlantDetail(plant);
+                }
+                
+                this.showNotification(`${plant.name} ${careLabels[careType].toLowerCase()}!`);
+            }
+
+            recordCustomCare(plantId, customCareId) {
+                const plant = this.plants.find(p => p.id === plantId);
+                if (!plant || !plant.customCare) return;
+
+                const customCare = plant.customCare.find(c => c.id === customCareId);
+                if (!customCare) return;
+
+                customCare.lastDone = new Date().toISOString();
+                this.savePlants();
+                
+                this.addDiaryEntry(plantId, customCare.name, 'custom');
+                
+                this.renderPlants();
+                if (this.currentPlant && this.currentPlant.id === plantId) {
+                    this.populatePlantDetail(plant);
+                }
+                
+                this.showNotification(`${plant.name} - ${customCare.name} completed!`);
+            }
+
+            // Diary Management
+            addDiaryEntry(plantId, text, type) {
+                const entry = {
+                    id: Date.now().toString(),
+                    plantId: plantId || this.currentPlant?.id,
+                    text: text || document.getElementById('diaryInput')?.value,
+                    type: type || 'note',
+                    date: new Date().toISOString(),
+                    photo: null
+                };
+
+                if (!entry.text || !entry.plantId) return;
+
+                this.diaryEntries.push(entry);
+                this.saveDiary();
+                
+                if (document.getElementById('diaryInput')) {
+                    document.getElementById('diaryInput').value = '';
+                }
+                
+                if (this.currentPlant && this.currentPlant.id === plantId) {
+                    this.loadPlantDiary(plantId);
+                }
+            }
+
+            loadPlantDiary(plantId) {
+                const entries = this.diaryEntries
+                    .filter(e => e.plantId === plantId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .slice(0, 20);
+
+                const container = document.getElementById('diaryEntries');
+                
+                if (entries.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No diary entries yet</p>';
+                } else {
+                    container.innerHTML = entries.map(entry => {
+                        const date = new Date(entry.date);
+                        const icon = this.getDiaryIcon(entry.type);
+                        
+                        return `
+                            <div class="diary-entry">
+                                <div class="diary-date">${date.toLocaleString()}</div>
+                                <div class="diary-content">
+                                    <span class="diary-icon">${icon}</span>
+                                    <span class="diary-text">${entry.text}</span>
+                                    ${entry.photo ? `<img class="diary-photo" src="${entry.photo}" onclick="plantManager.viewPhoto('${entry.photo}')">` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            getDiaryIcon(type) {
+                const icons = {
+                    add: '🌱',
+                    water: '💧',
+                    fertilize: '🌰',
+                    mist: '💨',
+                    repot: '🪴',
+                    custom: '⭐',
+                    note: '📝',
+                    photo: '📷'
+                };
+                return icons[type] || '📝';
+            }
+
+            // Selection Mode
+            enterSelectionMode() {
+                this.selectionMode = true;
+                this.selectedPlants.clear();
+                document.getElementById('bulkActions').classList.add('active');
+                document.getElementById('fabBtn').textContent = '✓';
+                this.renderPlants();
+            }
+
+            toggleSelectionMode() {
+                if (this.selectionMode) {
+                    this.cancelSelection();
+                } else {
+                    this.enterSelectionMode();
+                }
+            }
+
+            togglePlantSelection(plantId) {
+                if (this.selectedPlants.has(plantId)) {
+                    this.selectedPlants.delete(plantId);
+                } else {
+                    this.selectedPlants.add(plantId);
+                }
+                
+                document.getElementById('selectedCount').textContent = this.selectedPlants.size;
+                
+                const card = document.querySelector(`.plant-card[data-plant-id="${plantId}"]`);
+                if (card) {
+                    const checkbox = card.querySelector('.selection-checkbox');
+                    checkbox.classList.toggle('checked', this.selectedPlants.has(plantId));
+                }
+            }
+
+            cancelSelection() {
+                this.selectionMode = false;
+                this.selectedPlants.clear();
+                document.getElementById('bulkActions').classList.remove('active');
+                document.getElementById('fabBtn').textContent = '+';
+                this.renderPlants();
+            }
+
+            // Bulk Actions
+            bulkWater() {
+                this.selectedPlants.forEach(plantId => {
+                    this.recordCare(plantId, 'water');
+                });
+                this.cancelSelection();
+                this.showNotification(`Watered ${this.selectedPlants.size} plants`);
+            }
+
+            bulkFertilize() {
+                this.selectedPlants.forEach(plantId => {
+                    this.recordCare(plantId, 'fertilize');
+                });
+                this.cancelSelection();
+                this.showNotification(`Fertilized ${this.selectedPlants.size} plants`);
+            }
+
+            bulkArchive() {
+                if (confirm(`Archive ${this.selectedPlants.size} plants?`)) {
+                    this.selectedPlants.forEach(plantId => {
+                        const plant = this.plants.find(p => p.id === plantId);
+                        if (plant) {
+                            plant.archived = true;
+                            plant.archivedAt = new Date().toISOString();
+                        }
+                    });
+                    this.savePlants();
+                    this.cancelSelection();
+                    this.renderPlants();
+                    this.showNotification(`Archived ${this.selectedPlants.size} plants`);
+                }
+            }
+
+            bulkEdit() {
+                // TODO: Implement bulk edit
+                this.showNotification('Bulk edit coming soon!');
+            }
+
+            // Custom Care Management
+            addCustomCare() {
+                const container = document.getElementById('customCareList');
+                const id = Date.now().toString();
+                
+                const item = document.createElement('div');
+                item.className = 'custom-care-item';
+                item.innerHTML = `
+                    <input type="text" class="custom-care-name" placeholder="Care type name">
+                    <input type="number" class="custom-care-frequency care-frequency-input" value="7" min="1">
+                    <span class="care-frequency-unit">days</span>
+                    <button type="button" class="remove-custom-btn" onclick="plantManager.removeCustomCare(this)">×</button>
+                `;
+                
+                container.appendChild(item);
+            }
+
+            removeCustomCare(button) {
+                button.parentElement.remove();
+            }
+
+            // Image Handling
+            handleImageUpload(event) {
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const preview = document.getElementById('imagePreview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        document.getElementById('uploadText').style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            selectPhoto(index) {
+                if (!this.currentPlant || !this.currentPlant.photos) return;
+                
+                document.getElementById('mainPhoto').src = this.currentPlant.photos[index];
+                document.querySelectorAll('.photo-thumb').forEach((thumb, i) => {
+                    thumb.classList.toggle('active', i === index);
+                });
+            }
+
+            addPhoto() {
+                // Create file input and trigger it
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.multiple = true;
+                
+                input.onchange = (e) => {
+                    const files = Array.from(e.target.files);
+                    let processed = 0;
+                    
+                    files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            this.currentPlant.photos.push(event.target.result);
+                            processed++;
+                            
+                            if (processed === files.length) {
+                                this.savePlants();
+                                this.populatePlantDetail(this.currentPlant);
+                                this.showNotification(`Added ${files.length} photo(s)`);
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                };
+                
+                input.click();
+            }
+
+            addDiaryPhoto() {
+                // TODO: Implement diary photo addition
+                this.showNotification('Photo diary coming soon!');
+            }
+
+            viewPhoto(photoUrl) {
+                // TODO: Implement full-screen photo viewer
+                window.open(photoUrl, '_blank');
+            }
+
+            // Reminders
+            checkReminders() {
+                const now = new Date();
+                const today = now.toDateString();
+                
+                this.plants.forEach(plant => {
+                    if (plant.archived) return;
+                    
+                    // Check each care type
+                    if (plant.care) {
+                        Object.keys(plant.care).forEach(careType => {
+                            const nextDate = this.getNextCareDate(plant, careType);
+                            const daysUntil = Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24));
+                            
+                            if (daysUntil <= 0) {
+                                const lastNotified = localStorage.getItem(`notified_${plant.id}_${careType}`);
+                                if (lastNotified !== today) {
+                                    this.sendNotification(
+                                        `Time to ${careType} ${plant.name}!`,
+                                        {
+                                            body: `Your plant needs ${careType}ing`,
+                                            icon: '🌱',
+                                            tag: `${plant.id}_${careType}`
+                                        }
+                                    );
+                                    localStorage.setItem(`notified_${plant.id}_${careType}`, today);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            startReminderCheck() {
+                // Check every hour
+                setInterval(() => this.checkReminders(), 60 * 60 * 1000);
+            }
+
+            showReminders() {
+                // TODO: Implement reminders page
+                const container = document.getElementById('plantContainer');
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">⏰</div><h2>Reminders</h2><p>Coming soon!</p></div>';
+            }
+
+            // Other Pages
+            showAllDiaries() {
+                // TODO: Implement all diaries view
+                const container = document.getElementById('plantContainer');
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📖</div><h2>All Diaries</h2><p>Coming soon!</p></div>';
+            }
+
+            showStats() {
+                // TODO: Implement statistics
+                const container = document.getElementById('plantContainer');
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><h2>Statistics</h2><p>Coming soon!</p></div>';
+            }
+
+            // Search
+            openSearch() {
+                const query = prompt('Search for a plant:');
+                if (query) {
+                    this.currentFilter = 'search';
+                    const filtered = this.plants.filter(p => 
+                        p.name.toLowerCase().includes(query.toLowerCase()) ||
+                        (p.location && p.location.toLowerCase().includes(query.toLowerCase()))
+                    );
+                    
+                    const container = document.getElementById('plantContainer');
+                    if (filtered.length === 0) {
+                        container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h2>No results</h2><p>Try a different search term</p></div>';
+                    } else {
+                        container.innerHTML = filtered.map(plant => this.createPlantCard(plant)).join('');
+                    }
+                }
+            }
+
+            // Backup & Restore
+            showBackupOptions() {
+                const choice = confirm('Backup (OK) or Restore (Cancel)?');
+                if (choice) {
+                    this.exportData();
+                } else {
+                    this.importData();
+                }
+            }
+
+            exportData() {
+                const data = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    plants: this.plants,
+                    diary: this.diaryEntries,
+                    settings: this.settings,
+                    customCareTypes: this.customCareTypes
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `plantnote_backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('Backup downloaded successfully!');
+            }
+
+            importData() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            
+                            if (confirm('This will replace all current data. Continue?')) {
+                                this.plants = data.plants || [];
+                                this.diaryEntries = data.diary || [];
+                                this.settings = data.settings || this.getDefaultSettings();
+                                this.customCareTypes = data.customCareTypes || [];
+                                
+                                this.savePlants();
+                                this.saveDiary();
+                                this.saveSettings();
+                                this.renderPlants();
+                                
+                                this.showNotification('Data restored successfully!');
+                            }
+                        } catch (error) {
+                            this.showNotification('Error reading backup file');
+                        }
+                    };
+                    
+                    reader.readAsText(file);
+                };
+                
+                input.click();
+            }
+
+            // Settings
+            openSettings() {
+                // TODO: Implement settings panel
+                this.showNotification('Settings coming soon!');
+            }
+
+            getDefaultSettings() {
+                return {
+                    notifications: true,
+                    reminderTime: '09:00',
+                    theme: 'auto',
+                    units: 'metric'
+                };
+            }
+
+            // Utilities
+            closeModal() {
+                document.getElementById('plantModal').classList.remove('active');
+                this.currentPlant = null;
+            }
+
+            showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            sendNotification(title, options) {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(title, options);
+                }
+            }
+
+            // Data Persistence
+            savePlants() {
+                this.saveData('plants', this.plants);
+            }
+
+            saveDiary() {
+                this.saveData('diary', this.diaryEntries);
+            }
+
+            saveSettings() {
+                this.saveData('settings', this.settings);
+            }
+
+            saveData(key, data) {
+                localStorage.setItem(`plantnote_${key}`, JSON.stringify(data));
+            }
+
+            loadData(key) {
+                const saved = localStorage.getItem(`plantnote_${key}`);
+                return saved ? JSON.parse(saved) : null;
+            }
+        }
+
+        // Initialize the app
+        const plantManager = new PlantManager();
+
+        // PWA Installation
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(registration => {
+                console.log('Service Worker registered');
+            }).catch(error => {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+    </script>
+</body>
+</html>
